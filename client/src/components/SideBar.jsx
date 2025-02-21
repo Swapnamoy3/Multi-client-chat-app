@@ -1,19 +1,33 @@
 import React from 'react'
 
 
-function ClientItem() {
-    return(
-        <div class="p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer">
-            <div class="flex items-center space-x-3">
-                <img src="https://loremflickr.com/40/40/avatar" alt="Client 1" class="w-8 h-8 rounded-full"/>
+function ClientItem({ name, status, type }) {
+    let bgColor = "bg-white"; // Default for direct conversation
+    let borderColor = "border-gray-100";
+
+    if (type === "broadcast") {
+        bgColor = "bg-blue-100"; // Light blue for broadcast
+        borderColor = "border-blue-300";
+    } else if (type === "multicast") {
+        bgColor = "bg-green-100"; // Light green for multicast
+        borderColor = "border-green-300";
+    }
+
+    return (
+        <div className={`p-4 border-b ${borderColor} hover:bg-gray-50 cursor-pointer ${bgColor}`}>
+            <div className="flex items-center space-x-3">
+                <img src="https://loremflickr.com/40/40/avatar" alt={name} className="w-8 h-8 rounded-full" />
                 <div>
-                    <h3 class="font-medium text-gray-800">Client 1</h3>
-                    <p class="text-sm text-gray-500">Online</p>
+                    <h3 className="font-medium text-gray-800">{name}</h3>
+                    <p className="text-sm text-gray-500">{status}</p>
                 </div>
             </div>
         </div>
-    )
+    );
 }
+
+
+
 
 export default function SideBar() {
   return (
@@ -23,7 +37,7 @@ export default function SideBar() {
             </div>
             <div class="overflow-y-auto h-[calc(100vh-4rem)]">
                 {/* <!-- Client Items --> */}
-                <ClientItem/>
+                <ClientItem name={"swap"} status={"Offline"} type = {'direct'}/>
                 {/* <!-- Repeat client items as needed --> */}
             </div>
         </div>

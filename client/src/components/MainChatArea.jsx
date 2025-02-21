@@ -1,6 +1,6 @@
 import React from 'react'
-import io from "socket.io-client";
-
+import SocketContext from '../context/socketContext'
+import { useContext } from 'react'
 function ChatHeader() {
     return(
         <div className="p-4 bg-white border-b border-gray-200">
@@ -16,27 +16,27 @@ function ChatHeader() {
 }
 
 
-function MessageReceived({message}) {
+function MessageReceived({message, time}) {
     return(
         <div className="flex items-start gap-2">
             <img src="https://loremflickr.com/32/32/avatar" alt="User" className="w-6 h-6 rounded-full mt-2"/>
             <div className="max-w-[70%]">
                 <div className="bg-white p-3 rounded-lg shadow-sm">
                     <p className="text-gray-800">{message}</p>
-                    <span className="text-xs text-gray-500 mt-1">10:30 AM</span>
+                    <span className="text-xs text-gray-500 mt-1">{time || "10:30 AM"}</span>
                 </div>
             </div>
         </div>
     )
 }
 
-function MessageSent({message}) {
+function MessageSent({message, time}) {
     return(
         <div className="flex items-start gap-2 justify-end">
             <div className="max-w-[70%]">
                 <div className="bg-blue-600 text-white p-3 rounded-lg shadow-sm">
                     <p>{message}</p>
-                    <span className="text-xs text-blue-100 mt-1">10:31 AM</span>
+                    <span className="text-xs text-blue-100 mt-1">{time || "10:31 AM"}</span>
                 </div>
             </div>
             <img src="https://loremflickr.com/32/32/avatar" alt="You" className="w-6 h-6 rounded-full mt-2"/>
@@ -44,13 +44,16 @@ function MessageSent({message}) {
     )
 }
 
-function MessageInput({messageInput, setMessagesInput, setMessages}) {
+function MessageInput({messageInput, setMessagesInput, setMessages, socket}) {
     function sendMessages(event) {
         event.preventDefault();
         if (messageInput.trim() !== "") {
+            socket.emit("send_message", messageInput);
             setMessages((msgs) => [...msgs, {
                 message: messageInput,
-                type: 'sent'
+                type: 'sent',
+                time: new Date().toLocaleTimeString()
+
             }]);
             setMessagesInput("");
         }
@@ -76,10 +79,14 @@ function MessageInput({messageInput, setMessagesInput, setMessages}) {
 export default function MainChatArea() {
     const [messages, setMessages] = React.useState([]);
     const [messageInput, setMessagesInput] = React.useState([]);
-
+    const socket = useContext(SocketContext);
     React.useEffect(() =>{
-        Socket.on("receive_message", data =>{
-            setMessages(msgs => [...msgs, {message: data, type: 'received'}])
+        socket.on("receive_messages", data =>{
+            setMessages(msgs => [...msgs, {
+                message: data, 
+                type: 'received',
+                time: new Date().toLocaleTimeString()
+            }])
         })
     },[])
 
@@ -93,8 +100,8 @@ export default function MainChatArea() {
                 
                 {messages.map( (message, index) => {
                     if(message.type === 'sent')
-                        return <MessageSent key = {index} message = {message.message}/>
-                    else return <MessageReceived key = {index} message = {message.message}/>
+                        return <MessageSent key = {index} message = {message.message} time = {message.time}/>
+                    else return <MessageReceived key = {index} message = {message.message} time = {message.time}/>
                 })}
 
                 
@@ -102,7 +109,7 @@ export default function MainChatArea() {
             </div>
 
             {/* <!-- Message Input --> */}
-            <MessageInput messageInput = {messageInput} setMessagesInput = {setMessagesInput} setMessages = {setMessages}/>
+            <MessageInput messageInput = {messageInput} setMessagesInput = {setMessagesInput} setMessages = {setMessages} socket = {socket}/>
         </div>
   )
 }
