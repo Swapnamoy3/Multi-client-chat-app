@@ -1,0 +1,34 @@
+# Node.js dependencies
+client/node_modules/
+server/node_modules/
+
+# Environment variables
+.env
+
+# Build artifacts
+client/build/
+server/dist/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Editor and OS-specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Cache and temp files
+client/.cache/
+server/.cache/
+
+# Ignore lock files (optional, depending on your package manager preference)
+package-lock.json
+yarn.lock
