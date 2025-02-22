@@ -2,7 +2,7 @@ import React from 'react'
 import SocketContext from '../context/socketContext'
 import { useContext } from 'react'
 
-function ClientItem({ name, status, type }) {
+function ClientItem({ name, status, type, onClick }) {
     let bgColor = "bg-white"; // Default for direct conversation
     let borderColor = "border-gray-100";
 
@@ -15,7 +15,9 @@ function ClientItem({ name, status, type }) {
     }
 
     return (
-        <div className={`p-4 border-b ${borderColor} hover:bg-gray-50 cursor-pointer ${bgColor}`}>
+        <div
+        onClick={onClick}
+        className={`p-4 border-b ${borderColor} hover:bg-gray-50 cursor-pointer ${bgColor}`}>
             <div className="flex items-center space-x-3">
                 <img src="https://loremflickr.com/40/40/avatar" alt={name} className="w-8 h-8 rounded-full" />
                 <div>
@@ -89,6 +91,17 @@ export default function SideBar({ rooms, setRooms, room, setRoom }) {
     function openCreateRoom() {
         createRoomDialogRef.current.showModal();
     }
+
+    function switchRooms(roomId){
+        const nextRoom = rooms.find(room => room.id == roomId);
+        const currRoom = room;
+        //update Rooms state
+        setRooms((rooms) => {
+            return [...rooms.filter(r => r.id != currRoom.id), currRoom];
+        })
+        setRoom(() => nextRoom);
+        console.log(nextRoom);
+    }
   return (
       <div class="w-1/4 bg-white border-r border-gray-200">
             <CreateNewRoom ref={createRoomDialogRef} socket={socket} setRooms = {setRooms} />
@@ -101,9 +114,8 @@ export default function SideBar({ rooms, setRooms, room, setRoom }) {
             </div>
             <div class="overflow-y-auto h-[calc(100vh-4rem)]">
                 {/* <!-- Client Items --> */}
-                <ClientItem name={"swap"} status={"Offline"} type = {'direct'}/>
                 {rooms.map((room, index) => (
-                    <ClientItem key={index} name={room.name} status={"Online"} type={room.type} />
+                    <ClientItem onClick = {() => switchRooms(room.id)} key={index} name={room.name} status={"Online"} type={room.type} />
                 ))}
                 {/* <!-- Repeat client items as needed --> */}
             </div>

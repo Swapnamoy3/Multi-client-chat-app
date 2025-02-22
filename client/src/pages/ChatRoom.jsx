@@ -13,17 +13,21 @@ const room = {
 
 */
 export default function ChatRoom() {
-    const [room, setRoom] = React.useState({});
-    const [rooms, setRooms] = React.useState([]);
+    const defaultBroadCastRoom = {
+      id: Math.round(Math.random()*1E8),
+      type: "broadcast",
+      name: "Broadcast Room",
+      members: [],
+      messages: []
+    }
+    const [room, setRoom] = React.useState(defaultBroadCastRoom);
+    const [rooms, setRooms] = React.useState([defaultBroadCastRoom]);
 
     React.useEffect(() => {
       console.log(rooms)
     },[rooms])
 
-    function switchRooms(roomId){
-        const nextRoom = rooms.find(room => room.id == roomId);
-        
-    }
+    
   return (
     // <!-- Main Container -->
     <div class="flex h-screen">
@@ -31,7 +35,7 @@ export default function ChatRoom() {
         <SideBar rooms = {rooms} setRooms = {setRooms} room = {room} setRoom = {setRoom} />
 
         {/* <!-- Main Chat Area --> */}
-        <MainChatArea/>
+        <MainChatArea room = {room} setRoom = {setRoom} />
     </div>
   )
 }

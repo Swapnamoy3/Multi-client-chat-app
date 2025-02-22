@@ -44,17 +44,32 @@ function MessageSent({message, time}) {
     )
 }
 
-function MessageInput({messageInput, setMessagesInput, setMessages, socket}) {
+/*
+messages: {
+    message, 
+    type: sent or received,
+    time
+}
+*/
+
+function MessageInput({messageInput, setMessagesInput, setRoom, socket}) {
     function sendMessages(event) {
         event.preventDefault();
         if (messageInput.trim() !== "") {
             socket.emit("send_message", messageInput);
-            setMessages((msgs) => [...msgs, {
-                message: messageInput,
+            const newMessage = {
+                message: messageInput, 
                 type: 'sent',
                 time: new Date().toLocaleTimeString()
+            };
 
-            }]);
+            setRoom( room => {
+                console.log("this is the room", room)
+                return {
+                    ...room,
+                    messages: [...room.messages, newMessage]
+                };
+            })
             setMessagesInput("");
         }
     }
@@ -76,17 +91,23 @@ function MessageInput({messageInput, setMessagesInput, setMessages, socket}) {
     )
 }
 
-export default function MainChatArea() {
-    const [messages, setMessages] = React.useState([]);
+export default function MainChatArea({room, setRoom}) {
     const [messageInput, setMessagesInput] = React.useState([]);
     const socket = useContext(SocketContext);
     React.useEffect(() =>{
         socket.on("receive_messages", data =>{
-            setMessages(msgs => [...msgs, {
+            const newMessage = {
                 message: data, 
                 type: 'received',
                 time: new Date().toLocaleTimeString()
-            }])
+            };
+
+            setRoom( room => {
+                return {
+                    ...room,
+                    messages: [...room.messages, newMessage]
+                };
+            })
         })
     },[])
 
@@ -98,7 +119,7 @@ export default function MainChatArea() {
             {/* <!-- Messages Container --> */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
                 
-                {messages.map( (message, index) => {
+                {room && room.messages && room.messages.map( (message, index) => {
                     if(message.type === 'sent')
                         return <MessageSent key = {index} message = {message.message} time = {message.time}/>
                     else return <MessageReceived key = {index} message = {message.message} time = {message.time}/>
@@ -109,7 +130,7 @@ export default function MainChatArea() {
             </div>
 
             {/* <!-- Message Input --> */}
-            <MessageInput messageInput = {messageInput} setMessagesInput = {setMessagesInput} setMessages = {setMessages} socket = {socket}/>
+            <MessageInput messageInput = {messageInput} setMessagesInput = {setMessagesInput} setRoom = {setRoom} socket = {socket}/>
         </div>
   )
 }
