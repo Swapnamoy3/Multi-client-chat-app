@@ -53,7 +53,6 @@ function CreateNewRoom({ ref, socket, setRooms}) {
         <dialog ref={ref} 
         className="p-6 rounded-lg shadow-lg bg-white w-96 max-w-full fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 backdrop:bg-gray-900/50 backdrop-blur-2xl">
             <h2 className="text-xl font-semibold text-gray-800 mb-4">Create New Room</h2>
-            
             <form 
                 onSubmit={createRoom}
                 className="space-y-4">
@@ -64,18 +63,13 @@ function CreateNewRoom({ ref, socket, setRooms}) {
                     placeholder="Room Name" 
                     className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
                 />
-                
-                <button 
-                    className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition cursor-pointer"
-                >
+                <button className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition cursor-pointer">
                     Create Room
                 </button>
             </form>
-
             <button 
             onClick={closeCreateRoom}
-            className="mt-4 w-full text-gray-500 hover:text-gray-700 text-sm cursor-pointer"
-            >
+            className="mt-4 w-full text-gray-500 hover:text-gray-700 text-sm cursor-pointer">
                 Cancel
             </button>
         </dialog>
@@ -83,13 +77,46 @@ function CreateNewRoom({ ref, socket, setRooms}) {
 }
 
 
+function AcceptInvite({ ref }) {
+    function declineInvite(){
+        // send decline
+        ref.current.close();
+    }
+
+    function acceptInvite(){
+        //send an accept event
+        ref.current.close();
+    }
+    return (
+        <dialog ref={ref} className="p-6 rounded-lg shadow-lg bg-white w-96 max-w-full fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 backdrop:bg-gray-900/50 backdrop-blur-sm">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">Accept Invitation</h2>
+            
+            <p className="text-gray-600 mb-4">You have been invited to join a room. Do you want to accept the invitation?</p>
+            
+            <div className="flex justify-end space-x-3">
+                <button 
+                    onClick={declineInvite} 
+                    className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition">
+                    Decline
+                </button>
+                <button 
+                    onClick={acceptInvite}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                    Accept
+                </button>
+            </div>
+        </dialog>
+    );
+}
+
 
 
 export default function SideBar({ rooms, setRooms, room, setRoom }) {
     const socket = useContext(SocketContext);
     const createRoomDialogRef = React.useRef(null);
+    const acceptInviteDialogRef = React.useRef(null);
     function openCreateRoom() {
-        createRoomDialogRef.current.showModal();
+        acceptInviteDialogRef.current.showModal();
     }
 
     function switchRooms(roomId){
@@ -105,6 +132,7 @@ export default function SideBar({ rooms, setRooms, room, setRoom }) {
   return (
       <div class="w-1/4 bg-white border-r border-gray-200">
             <CreateNewRoom ref={createRoomDialogRef} socket={socket} setRooms = {setRooms} />
+            <AcceptInvite ref = {acceptInviteDialogRef}/>
             <div class="p-4 bg-gray-50 border-b border-gray-200 flex justify-between">
                 <h2 class="text-xl font-semibold text-gray-800">Active Clients</h2>
                 {/* for creating new room */}
@@ -112,13 +140,14 @@ export default function SideBar({ rooms, setRooms, room, setRoom }) {
                 onClick={openCreateRoom}
                 className='bg-gray-200 text-gray-600 rounded-full w-8 h-8 flex justify-center items-center cursor-pointer active:scale-95 hover:bg-gray-300'> <i class="fa-solid fa-plus"></i> </span>
             </div>
+
             <div class="overflow-y-auto h-[calc(100vh-4rem)]">
-                {/* <!-- Client Items --> */}
+                {/* <!-- Client Items --> <!-- Repeat client items as needed --> */}
                 {rooms.map((room, index) => (
                     <ClientItem onClick = {() => switchRooms(room.id)} key={index} name={room.name} status={"Online"} type={room.type} />
                 ))}
-                {/* <!-- Repeat client items as needed --> */}
             </div>
+
         </div>
   )
 }
