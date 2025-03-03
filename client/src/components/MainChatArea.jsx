@@ -1,53 +1,11 @@
 import React from 'react'
 import SocketContext from '../context/socketContext'
 import { useContext } from 'react'
-function ChatHeader() {
-    return(
-        <div className="p-4 bg-white border-b border-gray-200">
-            <div className="flex items-center space-x-3">
-                <img src="https://loremflickr.com/40/40/avatar" alt="Selected Client" className="w-8 h-8 rounded-full"/>
-                <div>
-                    <h2 className="font-semibold text-gray-800">Group Chat</h2>
-                    <p className="text-sm text-gray-500">3 participants</p>
-                </div>
-            </div>
-        </div>
-    )
-}
-
-
-function MessageReceived({message, time, sender}) {
-    return(
-        <div className="flex items-end gap-2">
-            <img src="https://loremflickr.com/32/32/avatar" alt="User" className="w-8 h-8 rounded-full shadow-md"/>
-            <div className="max-w-[70%] max-h-[50%]">
-            <div className="bg-gray-100 p-3 rounded-2xl shadow-md">
-                    <p className="text-gray-900 font-semibold">{sender}</p>
-                    <p className="text-gray-800 mt-1">{message}</p>
-                    <span className="text-xs text-gray-500 mt-2 block text-right">{time || "10:30 AM"}</span>
-                </div>
-            </div>
-        </div>
-
-    )
-}
-
-function MessageSent({message, time, sender}) {
-    return(
-    <div className="flex items-end gap-2 justify-end">
-        <div className="max-w-[70%] min-w-[10%]">
-            <div className="bg-blue-600 text-white p-3 rounded-2xl shadow-md relative">
-                <p className="text-gray-900 font-semibold">{sender}</p>
-                <p className="mt-1">{message}</p>
-                <span className="text-xs text-blue-200 mt-2 block text-right">{time || "10:31 AM"}</span>
-            </div>
-        </div>
-        <img src="https://loremflickr.com/32/32/avatar" alt="You" className="w-8 h-8 rounded-full shadow-md"
-        />
-    </div>
-
-    )
-}
+import { ChatHeader } from './MainChatArea/ChatHeader'
+import { MessageSent, MessageReceived } from './MainChatArea/Messages'
+import { MessageInput } from './MainChatArea/MessageInput'
+import { createMessage } from '../utils/createMessage'
+import { insertMessage } from '../utils/insertMessage'
 
 /*
 messages: {
@@ -57,72 +15,19 @@ messages: {
     sender
 }
 */
-
-function MessageInput({messageInput, setMessagesInput, setRoom, socket}) {
-    function sendMessages(event) {
-        event.preventDefault();
-        if (messageInput.trim() !== "") {
-            socket.emit("send_message", messageInput);
-            const newMessage = {
-                message: messageInput, 
-                type: 'sent',
-                time: new Date().toLocaleTimeString(),
-                sender: "You"
-            };
-
-            setRoom( room => {
-                console.log("this is the room", room)
-                socket.emit("send_message_direct", room.id, messageInput);
-                return {
-                    ...room,
-                    messages: [...room.messages, newMessage]
-                };
-            })
-            setMessagesInput("");
-        }
-    }
-    return(
-        <div className="p-4 bg-white border-t border-gray-200">
-            <form 
-            onSubmit={sendMessages}
-            className="flex space-x-2">
-                <input type="text" 
-                        value={messageInput}
-                        onChange={(event)=>setMessagesInput(event.target.value)}
-                        placeholder="Type your message..." 
-                        className="flex-1 p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"/>
-                <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                    Send
-                </button>
-            </form>
-        </div>
-    )
-}
-
 export default function MainChatArea({room, setRoom}) {
     const [messageInput, setMessagesInput] = React.useState([]);
     const socket = useContext(SocketContext);
-    React.useEffect(() =>{
-        socket.on("receive_messages",(sender ,data) =>{
-            const newMessage = {
-                message: data, 
-                type: 'received',
-                time: new Date().toLocaleTimeString(),
-                sender: sender
-            };
 
-            setRoom( room => {
-                return {
-                    ...room,
-                    messages: [...room.messages, newMessage]
-                };
-            })
+    React.useEffect(() =>{
+        socket.on("receive_messages",(sender ,data) =>{ //data is the message, sender is the sender ID
+            const newMessage = createMessage(data, "received", sender);
+            setRoom( room => insertMessage(room, newMessage));
         })
     },[])
 
   return (
         <div className="flex-1 flex flex-col">
-            {/* <!-- Chat Header --> */}
             <ChatHeader/>
 
             {/* <!-- Messages Container --> */}
