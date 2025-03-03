@@ -16,31 +16,36 @@ function ChatHeader() {
 }
 
 
-function MessageReceived({message, time}) {
+function MessageReceived({message, time, sender}) {
     return(
-        <div className="flex items-start gap-2">
-            <img src="https://loremflickr.com/32/32/avatar" alt="User" className="w-6 h-6 rounded-full mt-2"/>
-            <div className="max-w-[70%]">
-                <div className="bg-white p-3 rounded-lg shadow-sm">
-                    <p className="text-gray-800">{message}</p>
-                    <span className="text-xs text-gray-500 mt-1">{time || "10:30 AM"}</span>
+        <div className="flex items-end gap-2">
+            <img src="https://loremflickr.com/32/32/avatar" alt="User" className="w-8 h-8 rounded-full shadow-md"/>
+            <div className="max-w-[70%] max-h-[50%]">
+            <div className="bg-gray-100 p-3 rounded-2xl shadow-md">
+                    <p className="text-gray-900 font-semibold">{sender}</p>
+                    <p className="text-gray-800 mt-1">{message}</p>
+                    <span className="text-xs text-gray-500 mt-2 block text-right">{time || "10:30 AM"}</span>
                 </div>
             </div>
         </div>
+
     )
 }
 
-function MessageSent({message, time}) {
+function MessageSent({message, time, sender}) {
     return(
-        <div className="flex items-start gap-2 justify-end">
-            <div className="max-w-[70%]">
-                <div className="bg-blue-600 text-white p-3 rounded-lg shadow-sm">
-                    <p>{message}</p>
-                    <span className="text-xs text-blue-100 mt-1">{time || "10:31 AM"}</span>
-                </div>
+    <div className="flex items-end gap-2 justify-end">
+        <div className="max-w-[70%] min-w-[10%]">
+            <div className="bg-blue-600 text-white p-3 rounded-2xl shadow-md relative">
+                <p className="text-gray-900 font-semibold">{sender}</p>
+                <p className="mt-1">{message}</p>
+                <span className="text-xs text-blue-200 mt-2 block text-right">{time || "10:31 AM"}</span>
             </div>
-            <img src="https://loremflickr.com/32/32/avatar" alt="You" className="w-6 h-6 rounded-full mt-2"/>
         </div>
+        <img src="https://loremflickr.com/32/32/avatar" alt="You" className="w-8 h-8 rounded-full shadow-md"
+        />
+    </div>
+
     )
 }
 
@@ -49,6 +54,7 @@ messages: {
     message, 
     type: sent or received,
     time
+    sender
 }
 */
 
@@ -60,11 +66,13 @@ function MessageInput({messageInput, setMessagesInput, setRoom, socket}) {
             const newMessage = {
                 message: messageInput, 
                 type: 'sent',
-                time: new Date().toLocaleTimeString()
+                time: new Date().toLocaleTimeString(),
+                sender: "You"
             };
 
             setRoom( room => {
                 console.log("this is the room", room)
+                socket.emit("send_message_direct", room.id, messageInput);
                 return {
                     ...room,
                     messages: [...room.messages, newMessage]
@@ -95,11 +103,12 @@ export default function MainChatArea({room, setRoom}) {
     const [messageInput, setMessagesInput] = React.useState([]);
     const socket = useContext(SocketContext);
     React.useEffect(() =>{
-        socket.on("receive_messages", data =>{
+        socket.on("receive_messages",(sender ,data) =>{
             const newMessage = {
                 message: data, 
                 type: 'received',
-                time: new Date().toLocaleTimeString()
+                time: new Date().toLocaleTimeString(),
+                sender: sender
             };
 
             setRoom( room => {
@@ -121,8 +130,8 @@ export default function MainChatArea({room, setRoom}) {
                 
                 {room && room.messages && room.messages.map( (message, index) => {
                     if(message.type === 'sent')
-                        return <MessageSent key = {index} message = {message.message} time = {message.time}/>
-                    else return <MessageReceived key = {index} message = {message.message} time = {message.time}/>
+                        return <MessageSent key = {index} message = {message.message} time = {message.time} sender = {message.sender}/>
+                    else return <MessageReceived key = {index} message = {message.message} time = {message.time} sender = {message.sender}/>
                 })}
 
                 

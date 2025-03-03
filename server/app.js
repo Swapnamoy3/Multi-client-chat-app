@@ -14,14 +14,43 @@ const io = new Server(server, {
     }
 })
 
+
+
+
+function emitOnlineMembers(socket){
+    io.fetchSockets().then((data) => {
+        const socketIDs = data.map( client_socket => client_socket.id);
+        data.forEach((client_socket) =>{
+
+            client_socket.emit("online_members", socketIDs);
+        })
+    })
+}
+
+
 io.on("connection",(socket) =>{
+    console.log("User Connected", socket.id)
+
+    
+    emitOnlineMembers(socket);
+
+    
     socket.on("send_message",(data)=>{
-        console.log("message received: " , data);
-        socket.broadcast.emit("receive_messages", data);
+        console.log("message received: " , data);    
+        const sender = socket.id;
+        socket.broadcast.emit("receive_messages", sender, data);
     })
 
+
+    socket.on("send_message_direct", (receiver, data) =>{
+        const sender = socket.id;
+        socket.to(receiver).emit("receive_messages", sender, data);
+    })
+    
+    
     socket.on("disconnect", () => {
         console.log("User Disconnected", socket.id);
+        emitOnlineMembers(socket);
     });
 })
 

@@ -29,8 +29,11 @@ function ClientItem({ name, status, type, onClick }) {
     );
 }
 
-function CreateNewRoom({ ref, socket, setRooms}) {
+function CreateNewRoom({ ref, setRooms}) {
     const [roomName, setRoomName] = React.useState("") // room name
+    const socket = useContext(SocketContext);
+
+    React.useEffect(() => {})
 
     function closeCreateRoom(){
         ref.current.close();
@@ -111,12 +114,12 @@ function AcceptInvite({ ref }) {
 
 
 
-export default function SideBar({ rooms, setRooms, room, setRoom }) {
+export default function SideBar({ rooms, setRooms, room, setRoom}) {
     const socket = useContext(SocketContext);
     const createRoomDialogRef = React.useRef(null);
     const acceptInviteDialogRef = React.useRef(null);
     function openCreateRoom() {
-        acceptInviteDialogRef.current.showModal();
+        createRoomDialogRef.current.showModal();
     }
 
     function switchRooms(roomId){
@@ -129,9 +132,42 @@ export default function SideBar({ rooms, setRooms, room, setRoom }) {
         setRoom(() => nextRoom);
         console.log(nextRoom);
     }
+
+    React.useEffect(()=>{
+        socket.on("receive_messages", (sender, data)=>{
+            const r = room.find(r => r.id == sender);
+            const newMessage = {
+                message: data,
+                type: "received",
+                time: new Date().toLocaleTimeString(),
+                sender: sender
+
+            }
+            if(r){
+                switchRooms(sender);
+                setRoom( room => {
+                    return {
+                        ...room,
+                        messages: [...room.messages, newMessage]
+                    };
+                })
+            }else{
+                const broadCastRoom = rooms.find(r => r.type == "broadcast")
+                switchRooms(broadCastRoom.id);
+                setRoom( room => {
+                    return {
+                        ...room,
+                        messages: [...room.messages, newMessage]
+                    };
+                })
+
+            }
+        })
+    },[]);
+
   return (
       <div class="w-1/4 bg-white border-r border-gray-200">
-            <CreateNewRoom ref={createRoomDialogRef} socket={socket} setRooms = {setRooms} />
+            <CreateNewRoom ref={createRoomDialogRef} setRooms = {setRooms} />
             <AcceptInvite ref = {acceptInviteDialogRef}/>
             <div class="p-4 bg-gray-50 border-b border-gray-200 flex justify-between">
                 <h2 class="text-xl font-semibold text-gray-800">Active Clients</h2>
@@ -146,6 +182,11 @@ export default function SideBar({ rooms, setRooms, room, setRoom }) {
                 {rooms.map((room, index) => (
                     <ClientItem onClick = {() => switchRooms(room.id)} key={index} name={room.name} status={"Online"} type={room.type} />
                 ))}
+
+                {/* {onlineMembers.map((mem) =>{
+                    console.log(mem);
+                    return <ClientItem status={"Online"} name = {mem.name} type={mem.type}/>
+                })} */}
             </div>
 
         </div>
