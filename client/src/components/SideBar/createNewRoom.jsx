@@ -9,7 +9,7 @@ export function CreateNewRoom({ ref, setRooms }) {
     }
     function createRoomHandler(event) {
         event.preventDefault();
-        const newRoom = createNewRoom(roomName);
+        const newRoom = createNewRoom(roomName, Math.round(Math.random() * 1E8), 'multicast');
         setRooms((rooms) => [...rooms, newRoom]);
         setRoomName("");
         closeCreateRoom();

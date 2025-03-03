@@ -16,15 +16,27 @@ messages: {
 }
 */
 export default function MainChatArea({room, setRoom}) {
-    const [messageInput, setMessagesInput] = React.useState([]);
+    const [messageInput, setMessageInput] = React.useState([]);
     const socket = useContext(SocketContext);
 
-    React.useEffect(() =>{
-        socket.on("receive_messages",(sender ,data) =>{ //data is the message, sender is the sender ID
-            const newMessage = createMessage(data, "received", sender);
-            setRoom( room => insertMessage(room, newMessage));
-        })
-    },[])
+    function sendMessages(event) {
+        event.preventDefault();
+
+        if(messageInput.trim() == "") return;
+        const newMessage = createMessage(messageInput, "sent", "You");
+
+        if(room.type === "Direct"){
+            socket.emit("send_message_direct", room.id, messageInput);
+            console.log("sent direct message")
+        }
+        else{
+            socket.emit("send_message_broadcast", messageInput);
+            console.log("sent broadcast message")
+        }
+        
+        setRoom(room => insertMessage(room, newMessage));   
+        setMessageInput("");
+    }
 
   return (
         <div className="flex-1 flex flex-col">
@@ -44,7 +56,7 @@ export default function MainChatArea({room, setRoom}) {
             </div>
 
             {/* <!-- Message Input --> */}
-            <MessageInput messageInput = {messageInput} setMessagesInput = {setMessagesInput} setRoom = {setRoom} socket = {socket}/>
+            <MessageInput messageInput = {messageInput} setMessageInput = {setMessageInput} sendMessages={sendMessages}/>
         </div>
   )
 }

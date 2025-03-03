@@ -17,12 +17,11 @@ const io = new Server(server, {
 
 
 
-function emitOnlineMembers(socket){
+function emitOnlineMembers(){
     io.fetchSockets().then((data) => {
         const socketIDs = data.map( client_socket => client_socket.id);
-        data.forEach((client_socket) =>{
-
-            client_socket.emit("online_members", socketIDs);
+        socketIDs.forEach((id) => {
+            io.to(id).emit("online_members", socketIDs.filter((sid) => sid != id));
         })
     })
 }
@@ -32,19 +31,24 @@ io.on("connection",(socket) =>{
     console.log("User Connected", socket.id)
 
     
-    emitOnlineMembers(socket);
+    emitOnlineMembers();
 
     
-    socket.on("send_message",(data)=>{
+    socket.on("send_message_broadcast",(data)=>{
         console.log("message received: " , data);    
         const sender = socket.id;
-        socket.broadcast.emit("receive_messages", sender, data);
+        const type = "broadcast";
+        socket.broadcast.emit("receive_messages",type, sender, data);
     })
 
 
     socket.on("send_message_direct", (receiver, data) =>{
         const sender = socket.id;
-        socket.to(receiver).emit("receive_messages", sender, data);
+        const type = "direct";
+        console.log("message received: " , data);
+        console.log("sender: ", sender);
+        console.log("receiver: ", receiver);
+        socket.to(receiver).emit("receive_messages",type, sender, data);
     })
     
     
