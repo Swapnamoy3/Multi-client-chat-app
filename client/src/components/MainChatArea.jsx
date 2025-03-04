@@ -29,9 +29,13 @@ export default function MainChatArea({room, setRoom}) {
             socket.emit("send_message_direct", room.id, messageInput);
             console.log("sent direct message")
         }
-        else{
+        else if(room.type === "broadcast"){
             socket.emit("send_message_broadcast", messageInput);
             console.log("sent broadcast message")
+        }
+        else{
+            socket.emit("send_message_multicast", room.name, messageInput);
+            console.log("sent multicast message")
         }
         
         setRoom(room => insertMessage(room, newMessage));   

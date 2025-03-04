@@ -4,7 +4,7 @@ import SideBar from '../components/SideBar'
 import SocketContext from '../context/socketContext'
 import { createNewRoom } from '../utils/createNewRoom'
 import { insertMessage } from '../utils/insertMessage'
-import { useRoomUtils } from '../context/useRoomUtils'
+import { useRoomUtils } from '../hooks/useRoomUtils'
 import { createMessage } from '../utils/createMessage'
 /*
 const room = {
@@ -36,14 +36,14 @@ export default function ChatRoom() {
       socket.on("online_members", (data) =>{
         console.log(data)
           const directRooms = data.map( person => createNewRoom(person, person, "Direct"))
-          setOnlineMembers(()=> directRooms)
+          setOnlineMembers(()=> data);
           
           setRooms((rooms) => [...rooms.filter(r => r.type != "Direct"), ...directRooms]);
       });
   },[]);
 
   React.useEffect(()=>{
-      socket.on("receive_messages", (type,sender, data)=>{
+      socket.on("receive_messages", (type, roomName, sender, data)=>{
           const newMessage = createMessage(data, "received", sender);
           if(type == 'broadcast'){
               const broadCastRoom = rooms.find(r => r.type == "broadcast")
@@ -55,6 +55,15 @@ export default function ChatRoom() {
             const senderRoom = rooms.find(r => r.id === sender);
             if (senderRoom) {
               switchRooms(senderRoom.id);
+              setRoom(room => insertMessage(room, newMessage));
+            } else {
+              console.error("Room not found for sender:", sender);
+            }
+          }
+          else if(type == 'multicast'){
+            const multicastRoom = rooms.find(r => r.name === roomName);
+            if (multicastRoom) {
+              switchRooms(multicastRoom.id);
               setRoom(room => insertMessage(room, newMessage));
             } else {
               console.error("Room not found for sender:", sender);

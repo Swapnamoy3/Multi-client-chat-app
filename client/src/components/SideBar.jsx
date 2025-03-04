@@ -4,11 +4,11 @@ import { useContext } from 'react'
 import { ClientItem } from './SideBar/ClientItem';
 import { AcceptInvite } from './SideBar/AcceptInvite';
 import { CreateNewRoom } from './SideBar/createNewRoom';
-import { useRoomUtils } from '../context/useRoomUtils';
+import { useRoomUtils } from '../hooks/useRoomUtils';
 
 
 
-export default function SideBar({ rooms, setRooms, room, setRoom}) {
+export default function SideBar({ rooms, setRooms, room, setRoom, onlineMembers }) {
     const socket = useContext(SocketContext);
     const createRoomDialogRef = React.useRef(null);
     const acceptInviteDialogRef = React.useRef(null);
@@ -18,12 +18,15 @@ export default function SideBar({ rooms, setRooms, room, setRoom}) {
         createRoomDialogRef.current.showModal();
     }
 
+
+
+
     
 
   return (
       <div class="w-1/4 bg-white border-r border-gray-200">
-            <CreateNewRoom ref={createRoomDialogRef} setRooms = {setRooms} />
-            <AcceptInvite ref = {acceptInviteDialogRef}/>
+            <CreateNewRoom ref={createRoomDialogRef} setRooms = {setRooms} onlineMembers = {onlineMembers}/>
+            <AcceptInvite ref = {acceptInviteDialogRef} setRooms = {setRooms}/>
 
             <div class="p-4 bg-gray-50 border-b border-gray-200 flex justify-between">
                 <h2 class="text-xl font-semibold text-gray-800">Active Clients</h2>

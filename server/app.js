@@ -38,17 +38,42 @@ io.on("connection",(socket) =>{
         console.log("message received: " , data);    
         const sender = socket.id;
         const type = "broadcast";
-        socket.broadcast.emit("receive_messages",type, sender, data);
+        const roomName = "broadcast";
+        socket.broadcast.emit("receive_messages",type, roomName, sender, data);
     })
-
-
+    
+    
     socket.on("send_message_direct", (receiver, data) =>{
         const sender = socket.id;
         const type = "direct";
         console.log("message received: " , data);
         console.log("sender: ", sender);
         console.log("receiver: ", receiver);
-        socket.to(receiver).emit("receive_messages",type, sender, data);
+        const roomName = sender;
+        socket.to(receiver).emit("receive_messages",type, roomName, sender, data);
+    })
+
+    socket.on("send_message_multicast", (roomName, data) => {
+        const sender = socket.id;
+        const type = "multicast";
+        console.log("message received: " , data);
+        console.log("sender: ", sender);
+        console.log("room: ", roomName);
+        socket.to(roomName).emit("receive_messages",type, roomName, sender, data);
+    })
+
+    socket.on("create_room", (selectedMembers, roomName) => {
+        // make sure uniquen room name
+        socket.join(roomName);
+        console.log("room created: ", roomName);
+        selectedMembers.forEach(member => {
+            socket.to(member).emit("room_invite", roomName);
+        })
+    })
+
+    socket.on("accept_room_invite", (roomName) => {
+        socket.join(roomName);
+        console.log(socket.id," room joined: ", roomName);
     })
     
     
