@@ -1,7 +1,10 @@
+import 'boxicons'
 import React from 'react'
 import { useForm } from "react-hook-form"
 import { FormStepIndicator } from '../components/Auth/FormStepIndicator';
 import { FormField } from '../components/Auth/FormField';
+import { postRequest } from '../utils/apiRequests';
+import { Password } from '../components/Auth/Password';
 
 function Step1({setSelectedForm}){
     
@@ -13,8 +16,10 @@ function Step1({setSelectedForm}){
       } = useForm();
       
 
-    function nextFormPage(data){
+    async function nextFormPage(data){
         console.log(data)
+        const response = await postRequest("http://localhost:3000/signup", data);
+        console.log(response)
         setSelectedForm(s => Math.min(s+1,3));
     }
     return(<>
@@ -40,14 +45,10 @@ function Step1({setSelectedForm}){
                     error = {errors.email}
                     />
                 
-                <FormField
-                    label="Phone Number"
-                    id="phone"
-                    type="text"
-                    placeholder="e.g. +1 234 567 890"
-                    {...register("phone",{required : false})}
-                    error={errors.phone}
-                    />
+                <Password 
+                  register={register}
+                  error={errors.password}
+                />
 
                 {/* <!-- Next Step Button --> */}
                 <div className="flex justify-end">
@@ -70,8 +71,10 @@ function Step2({ setSelectedForm }) {
       formState: { errors },
     } = useForm();
   
-    function nextFormPage(data) {
+    async function nextFormPage(data) {
       console.log(data);
+      const response = await postRequest("http://localhost:3000/signup", data);
+      console.log(response)
       setSelectedForm((s) => Math.min(s + 1, 3));
     }
   
@@ -110,8 +113,10 @@ function Step2({ setSelectedForm }) {
       formState: { errors },
     } = useForm();
   
-    function nextFormPage(data) {
+    async function nextFormPage(data) {
       console.log(data);
+      const response = await postRequest("http://localhost:3000/signup", data);
+      console.log(response)
       setSelectedForm((s) => Math.min(s + 1, 3));
     }
   

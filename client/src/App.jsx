@@ -19,7 +19,7 @@ function App() {
   return (
     <>
     {socket && <SocketContext.Provider value = {socket}>
-      <Login/>
+      <SignUp/>
     </SocketContext.Provider>}
     </>
   )
