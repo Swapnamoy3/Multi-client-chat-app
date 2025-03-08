@@ -41,7 +41,7 @@ export default function ChatRoom() {
           setRooms((rooms) => [...rooms.filter(r => r.type != "Direct"), ...directRooms]);
       });
   },[]);
-
+  const Commerce = 10;
   React.useEffect(()=>{
       socket.on("receive_messages", (type, roomName, sender, data)=>{
           const newMessage = createMessage(data, "received", sender);

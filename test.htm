@@ -1,84 +1,110 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multi-Client Chat Interface</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8" />
+  <title>Multi-Step Sign Up</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100">
-    <!-- Main Container -->
-    <div class="flex h-screen">
-        <!-- Left Sidebar - Client List -->
-        <div class="w-1/4 bg-white border-r border-gray-200">
-            <div class="p-4 bg-gray-50 border-b border-gray-200">
-                <h2 class="text-xl font-semibold text-gray-800">Active Clients</h2>
-            </div>
-            <div class="overflow-y-auto h-[calc(100vh-4rem)]">
-                <!-- Client Items -->
-                <div class="p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer">
-                    <div class="flex items-center space-x-3">
-                        <img src="https://loremflickr.com/40/40/avatar" alt="Client 1" class="w-8 h-8 rounded-full">
-                        <div>
-                            <h3 class="font-medium text-gray-800">Client 1</h3>
-                            <p class="text-sm text-gray-500">Online</p>
-                        </div>
-                    </div>
-                </div>
-                <!-- Repeat client items as needed -->
-            </div>
+<body class="bg-slate-100 flex items-center justify-center min-h-screen">
+
+  <!-- Outer Container -->
+  <div class="bg-white w-[920px] rounded-lg shadow-xl flex flex-col md:flex-row p-4 md:p-8">
+    
+    <!-- Left Panel (Step indicators) -->
+    <div class="hidden md:flex flex-col w-1/3 p-8 rounded-lg text-white bg-[#483EFF]">
+      <div class="flex flex-col gap-8">
+        <!-- Step 1 (Active) -->
+        <div class="flex items-center gap-4">
+          <div class="border border-white rounded-full w-10 h-10 flex items-center justify-center">1</div>
+          <div class="flex flex-col">
+            <span class="uppercase text-xs text-gray-200">Step 1</span>
+            <span class="uppercase font-semibold tracking-wider text-sm">Your info</span>
+          </div>
         </div>
-
-        <!-- Main Chat Area -->
-        <div class="flex-1 flex flex-col">
-            <!-- Chat Header -->
-            <div class="p-4 bg-white border-b border-gray-200">
-                <div class="flex items-center space-x-3">
-                    <img src="https://loremflickr.com/40/40/avatar" alt="Selected Client" class="w-8 h-8 rounded-full">
-                    <div>
-                        <h2 class="font-semibold text-gray-800">Group Chat</h2>
-                        <p class="text-sm text-gray-500">3 participants</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Messages Container -->
-            <div class="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
-                <!-- Message Bubble (Received) -->
-                <div class="flex items-start gap-2">
-                    <img src="https://loremflickr.com/32/32/avatar" alt="User" class="w-6 h-6 rounded-full mt-2">
-                    <div class="max-w-[70%]">
-                        <div class="bg-white p-3 rounded-lg shadow-sm">
-                            <p class="text-gray-800">Hello! How can I help you today?</p>
-                            <span class="text-xs text-gray-500 mt-1">10:30 AM</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Message Bubble (Sent) -->
-                <div class="flex items-start gap-2 justify-end">
-                    <div class="max-w-[70%]">
-                        <div class="bg-blue-600 text-white p-3 rounded-lg shadow-sm">
-                            <p>I need help with my order</p>
-                            <span class="text-xs text-blue-100 mt-1">10:31 AM</span>
-                        </div>
-                    </div>
-                    <img src="https://loremflickr.com/32/32/avatar" alt="You" class="w-6 h-6 rounded-full mt-2">
-                </div>
-            </div>
-
-            <!-- Message Input -->
-            <div class="p-4 bg-white border-t border-gray-200">
-                <div class="flex space-x-2">
-                    <input type="text" 
-                           placeholder="Type your message..." 
-                           class="flex-1 p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
-                    <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                        Send
-                    </button>
-                </div>
-            </div>
+        <!-- Step 2 -->
+        <div class="flex items-center gap-4 opacity-70">
+          <div class="border border-white rounded-full w-10 h-10 flex items-center justify-center">2</div>
+          <div class="flex flex-col">
+            <span class="uppercase text-xs text-gray-200">Step 2</span>
+            <span class="uppercase font-semibold tracking-wider text-sm">Select plan</span>
+          </div>
         </div>
+        <!-- Step 3 -->
+        <div class="flex items-center gap-4 opacity-70">
+          <div class="border border-white rounded-full w-10 h-10 flex items-center justify-center">3</div>
+          <div class="flex flex-col">
+            <span class="uppercase text-xs text-gray-200">Step 3</span>
+            <span class="uppercase font-semibold tracking-wider text-sm">Add-ons</span>
+          </div>
+        </div>
+        <!-- Step 4 -->
+        <div class="flex items-center gap-4 opacity-70">
+          <div class="border border-white rounded-full w-10 h-10 flex items-center justify-center">4</div>
+          <div class="flex flex-col">
+            <span class="uppercase text-xs text-gray-200">Step 4</span>
+            <span class="uppercase font-semibold tracking-wider text-sm">Summary</span>
+          </div>
+        </div>
+      </div>
     </div>
+
+    <!-- Right Panel (Form) -->
+    <div class="w-full md:w-2/3 px-4 py-8 md:px-8 md:py-12">
+      <h1 class="text-2xl font-bold text-slate-800 mb-2">Personal info</h1>
+      <p class="text-gray-500 mb-6">Please provide your name, email address, and phone number.</p>
+      <form action="#" method="POST" class="flex flex-col gap-6">
+        <!-- Name Field -->
+        <div>
+          <label for="name" class="block text-sm font-medium text-slate-700 mb-1">Name</label>
+          <input
+            type="text"
+            id="name"
+            name="name"
+            placeholder="e.g. Stephen King"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 placeholder-gray-400 focus:outline-none focus:border-blue-500"
+          />
+          <!-- Example of an error message: 
+          <p class="text-red-500 text-sm mt-1">This field is required</p> -->
+        </div>
+
+        <!-- Email Field -->
+        <div>
+          <label for="email" class="block text-sm font-medium text-slate-700 mb-1">Email Address</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            placeholder="e.g. stephenking@lorem.com"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 placeholder-gray-400 focus:outline-none focus:border-blue-500"
+          />
+        </div>
+
+        <!-- Phone Field -->
+        <div>
+          <label for="phone" class="block text-sm font-medium text-slate-700 mb-1">Phone Number</label>
+          <input
+            type="text"
+            id="phone"
+            name="phone"
+            placeholder="e.g. +1 234 567 890"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 placeholder-gray-400 focus:outline-none focus:border-blue-500"
+          />
+        </div>
+
+        <!-- Next Step Button -->
+        <div class="flex justify-end">
+          <button
+            type="submit"
+            class="bg-blue-800 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition-colors"
+          >
+            Next Step
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
 </body>
 </html>
