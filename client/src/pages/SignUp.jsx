@@ -20,7 +20,7 @@ function Step1({setSelectedForm}){
         console.log(data)
         const response = await postRequest("http://localhost:3000/signup", data);
         console.log(response)
-        setSelectedForm(s => Math.min(s+1,3));
+        // setSelectedForm(s => Math.min(s+1,3));
     }
     return(<>
         <h1 className="text-2xl font-bold text-slate-800 mb-2">Personal info</h1>
