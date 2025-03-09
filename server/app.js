@@ -7,7 +7,7 @@ const setupIO = require("./io.js");
 const { createUser, saveUser, getUser, updateUser } = require("./database.js");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const cookieParser = require("cookie-parser");
+// const cookieParser = require("cookie-parser");
 const app = express();
 app.use(cors());
 const server = http.createServer(app);
@@ -20,7 +20,7 @@ const io = new Server(server, {
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
+// app.use(cookieParser());
 
 
 const JWT_SECRET = "mySecret";
@@ -77,12 +77,13 @@ app.post("/login", async (res,req) => {
 
     const token = generateToken(user);
 
-    res.cookie("token", token, {
-        httpOnly: true,
-        secure: false, 
-        sameSite: "Strict",
-        maxAge: 1000 * 60 * 60 * 1 // becuase 1 hour is the expire time in jwt token
-    })
+    // res.cookie("token", token, {
+    //     httpOnly: true,
+    //     secure: false, 
+    //     sameSite: "Strict",
+    //     maxAge: 1000 * 60 * 60 * 1 // becuase 1 hour is the expire time in jwt token
+    // })
+    console.log(token);
 
     res.json({status: "ok", message: "You have been logged in"});
 })
