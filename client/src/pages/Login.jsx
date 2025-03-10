@@ -1,6 +1,7 @@
 import React from 'react'
 import { FormField } from '../components/Auth/FormField'
 import { useForm } from 'react-hook-form'
+import { postRequest } from '../utils/apiRequests';
 export default function Login() {
     const {
             register,
@@ -9,7 +10,9 @@ export default function Login() {
             formState: { errors },
           } = useForm();
 
-    function submitForm(data){
+    async function submitForm(data){
+        const response = await postRequest("http://localhost:3000/login", data);
+        console.log(response)
         console.log(data);
     }
 

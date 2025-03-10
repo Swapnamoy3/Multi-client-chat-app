@@ -18,8 +18,13 @@ function Step1({setSelectedForm}){
 
     async function nextFormPage(data){
         console.log(data)
-        const response = await postRequest("http://localhost:3000/signup", data);
-        console.log(response)
+        try{
+          console.log("sendint the request")
+          const response = await postRequest("http://localhost:3000/signup", data);
+          console.log(response)
+        }catch(e){
+          console.log(e)
+        }
         // setSelectedForm(s => Math.min(s+1,3));
     }
     return(<>

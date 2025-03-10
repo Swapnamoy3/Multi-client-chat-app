@@ -1,8 +1,8 @@
 import React from 'react';
 
 export function FormField({ label, id, type, placeholder, onChange, onBlur, name, ref, error }) {
-    console.log(name);
-    console.log(error);
+    // console.log(name);
+    // console.log(error);
     return (
         <div>
             <label for={id} className="block text-sm font-medium text-slate-700 mb-1">{label}</label>

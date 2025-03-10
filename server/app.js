@@ -7,9 +7,16 @@ const setupIO = require("./io.js");
 const { createUser, saveUser, getUser, updateUser } = require("./database.js");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-// const cookieParser = require("cookie-parser");
+const cookieParser = require("cookie-parser");
 const app = express();
-app.use(cors());
+app.use(cors(
+    {
+        origin: 'http://localhost:5173',
+        credentials: true, // Allow cookies to be sent with requests
+        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allowedHeaders: ["Content-Type", "Authorization"]
+    }
+));
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
@@ -20,7 +27,7 @@ const io = new Server(server, {
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-// app.use(cookieParser());
+app.use(cookieParser());
 
 
 const JWT_SECRET = "mySecret";
@@ -40,17 +47,18 @@ function generateToken(user){
 app.post("/signup",async (req,res) => {
     console.log("This is a body:")
     console.log(req.body);
-    const {name, email, password} = req.body;
+    let {name, email, password} = req.body;
     name = name.trim().toLowerCase();
     email = email.trim().toLowerCase();
     password = password.trim();
 
     if(!name || !email || !password){
-        res.status(400).json({status: 400, message: "Invalid SignUp Info"});
+       return res.status(400).json({status: 400, message: "Invalid SignUp Info"});
     }
     
     if(getUser(email)){
-        res.status(400).json({status: 400, message: "User Already exist"});
+        return res.json({status: 400, message: "User Already exist"});
+
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -58,12 +66,15 @@ app.post("/signup",async (req,res) => {
 
     const user = createUser(name, email, hashedPassword);
     saveUser(user);
+    console.log(user)
 
     res.json({status: "ok", message: "YOu have been signed up and Logged in"});
 })
 
-app.post("/login", async (res,req) => {
-    const {email, password} = res.body;
+app.post("/login", async (req, res) => {
+    console.log(req.body);
+    const {email, password} = req.body;
+
     const user = getUser(email);
     if(!user){
         return res.status(401).json({ status: 401, message: "Email not registered" });
@@ -77,17 +88,35 @@ app.post("/login", async (res,req) => {
 
     const token = generateToken(user);
 
-    // res.cookie("token", token, {
-    //     httpOnly: true,
-    //     secure: false, 
-    //     sameSite: "Strict",
-    //     maxAge: 1000 * 60 * 60 * 1 // becuase 1 hour is the expire time in jwt token
-    // })
-    console.log(token);
+    res.cookie("token", token, {
+        httpOnly: true,
+        secure: false, 
+        // sameSite: "lax",
+        maxAge: 1000 * 60 * 60 * 1 // because 1 hour is the expire time in jwt token
+    })
+    console.log("token:",token);
 
     res.json({status: "ok", message: "You have been logged in"});
 })
 
+function authenticate(req, res, next){
+    const token = req.cookies.token;
+    console.log(req.cookies);
+    if(!token) return  res.status(403).json({status: 403, message: "Unauthorized"});
+
+    jwt.verify(token, JWT_SECRET, (err, user) =>{
+        console.log(err)
+        if(err) return res.status(403).json({ status: 403, message: "Invalid token" });
+        req.user = user;
+        next();
+    })
+
+}
+
+app.get("/isLoggedIn", authenticate, async (req, res) => {
+    console.log("authorized");
+    res.json({status: 200, message: "Authorized"})
+})
 
 
 setupIO(io);
