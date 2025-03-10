@@ -5,10 +5,16 @@ const {Server} = require("socket.io")
 const log = require("./logger.js");
 const setupIO = require("./io.js");
 const { createUser, saveUser, getUser, updateUser } = require("./database.js");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const app = express();
+const dotenv = require("dotenv");
+const { trimUser } = require("./helpers/trimUser.js");
+const { generateToken } = require("./helpers/generateToken.js");
+const { hashPassword } = require("./helpers/hashPassword.js");
+const { verifyPassword } = require("./helpers/verifyPassword.js");
+const { authenticate } = require("./helpers/authenticate.js");
+dotenv.config();
+
 app.use(cors(
     {
         origin: 'http://localhost:5173',
@@ -30,27 +36,14 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 
-const JWT_SECRET = "mySecret";
-
-function generateToken(user){
-    return  jwt.sign({
-        id: user.id,
-        email: user.email
-    }, 
-        JWT_SECRET,{
-            expiresIn: "1h"
-        }
-    )
-}
+const JWT_SECRET = process.env.JWT_SECRET || "mySecret";
+exports.JWT_SECRET = JWT_SECRET;
 
 
 app.post("/signup",async (req,res) => {
     console.log("This is a body:")
     console.log(req.body);
-    let {name, email, password} = req.body;
-    name = name.trim().toLowerCase();
-    email = email.trim().toLowerCase();
-    password = password.trim();
+    let {name, email, password} = trimUser(req.body);
 
     if(!name || !email || !password){
        return res.status(400).json({status: 400, message: "Invalid SignUp Info"});
@@ -61,57 +54,42 @@ app.post("/signup",async (req,res) => {
 
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-
+    const hashedPassword = await hashPassword(password);
 
     const user = createUser(name, email, hashedPassword);
     saveUser(user);
-    console.log(user)
 
     res.json({status: "ok", message: "YOu have been signed up and Logged in"});
 })
 
 app.post("/login", async (req, res) => {
-    console.log(req.body);
-    const {email, password} = req.body;
+    const {email, password} = trimUser(req.body);
+    
+    if(!email || !password){
+        return res.status(400).json({status: 400, message: "Invalid Login Info"});
+    }
 
     const user = getUser(email);
     if(!user){
         return res.status(401).json({ status: 401, message: "Email not registered" });
     }
 
-    const passwordMatching = await bcrypt.compare(password, user.password);
-    if(!passwordMatching){
+    
+    if(!await verifyPassword(password, user.password)){
         return res.status(401).json({ status: 401, message: "Invalid credentials" });
     }
-
 
     const token = generateToken(user);
 
     res.cookie("token", token, {
         httpOnly: true,
         secure: false, 
-        // sameSite: "lax",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "Strict",
         maxAge: 1000 * 60 * 60 * 1 // because 1 hour is the expire time in jwt token
     })
-    console.log("token:",token);
 
     res.json({status: "ok", message: "You have been logged in"});
 })
-
-function authenticate(req, res, next){
-    const token = req.cookies.token;
-    console.log(req.cookies);
-    if(!token) return  res.status(403).json({status: 403, message: "Unauthorized"});
-
-    jwt.verify(token, JWT_SECRET, (err, user) =>{
-        console.log(err)
-        if(err) return res.status(403).json({ status: 403, message: "Invalid token" });
-        req.user = user;
-        next();
-    })
-
-}
 
 app.get("/isLoggedIn", authenticate, async (req, res) => {
     console.log("authorized");
@@ -122,8 +100,8 @@ app.get("/isLoggedIn", authenticate, async (req, res) => {
 setupIO(io);
 
 
-
-server.listen(3000,()=> {
+const PORT = process.env.PORT || 3000
+server.listen(PORT ,()=> {
     console.log("Server has started");
 });
 
