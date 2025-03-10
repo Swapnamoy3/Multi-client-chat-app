@@ -8,11 +8,12 @@ const { createUser, saveUser, getUser, updateUser } = require("./database.js");
 const cookieParser = require("cookie-parser");
 const app = express();
 const dotenv = require("dotenv");
-const { trimUser } = require("./helpers/trimUser.js");
-const { generateToken } = require("./helpers/generateToken.js");
-const { hashPassword } = require("./helpers/hashPassword.js");
-const { verifyPassword } = require("./helpers/verifyPassword.js");
-const { authenticate } = require("./helpers/authenticate.js");
+
+
+const { trimUser } = require("./helpers/userHelpers.js");
+const { hashPassword, verifyPassword } = require("./helpers/bcryptjs.js");
+const { authenticate, generateToken } = require("./helpers/jwt.js");
+
 dotenv.config();
 
 app.use(cors(
@@ -36,13 +37,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 
-const JWT_SECRET = process.env.JWT_SECRET || "mySecret";
-exports.JWT_SECRET = JWT_SECRET;
 
 
 app.post("/signup",async (req,res) => {
-    console.log("This is a body:")
-    console.log(req.body);
     let {name, email, password} = trimUser(req.body);
 
     if(!name || !email || !password){

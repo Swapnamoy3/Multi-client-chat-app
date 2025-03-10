@@ -1,6 +1,8 @@
 const jwt = require("jsonwebtoken");
-const { JWT_SECRET } = require("../app");
+const dotenv = require("dotenv");
+dotenv.config();
 
+const JWT_SECRET = process.env.JWT_SECRET || "mySecret";
 function authenticate(req, res, next) {
     const token = req.cookies.token;
     console.log(req.cookies);
@@ -11,6 +13,17 @@ function authenticate(req, res, next) {
         req.user = user;
         next();
     });
-
 }
-exports.authenticate = authenticate;
+
+function generateToken(user) {
+    return jwt.sign({
+        id: user.id,
+        email: user.email
+    },
+        JWT_SECRET, {
+        expiresIn: "1h"
+    }
+    );
+}
+
+module.exports = { authenticate, generateToken };
