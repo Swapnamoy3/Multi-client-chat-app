@@ -1,5 +1,7 @@
+const { getUser, updateUser } = require("./database.js");
+
 function setupIO(io) {
-    
+    const userSocketMap = new Map();
     function emitOnlineMembers(){
         io.fetchSockets().then((data) => {
             const socketIDs = data.map( client_socket => client_socket.id);
@@ -12,7 +14,15 @@ function setupIO(io) {
     
     io.on("connection",(socket) =>{
         console.log("User Connected", socket.id)
-    
+        socket.on("hello", (user) => {
+            console.log(user)
+            userSocketMap.set(socket.id, user);
+            const userObj = getUser(user.email);
+            if(!userObj) return;
+            userObj.socketID = socket.id;
+            updateUser(userObj.id, userObj);
+            console.log(userObj);
+        })
         
         emitOnlineMembers();
     
@@ -22,7 +32,8 @@ function setupIO(io) {
             const sender = socket.id;
             const type = "broadcast";
             const roomName = "broadcast";
-            socket.broadcast.emit("receive_messages",type, roomName, sender, data);
+            const senderName = userSocketMap.get(sender).name;
+            socket.broadcast.emit("receive_messages",type, roomName, sender, senderName, data);
         })
         
         
@@ -33,7 +44,8 @@ function setupIO(io) {
             console.log("sender: ", sender);
             console.log("receiver: ", receiver);
             const roomName = sender;
-            socket.to(receiver).emit("receive_messages",type, roomName, sender, data);
+            const senderName = userSocketMap.get(sender).name;
+            socket.to(receiver).emit("receive_messages",type, roomName, sender, senderName, data);
         })
     
         socket.on("send_message_multicast", (roomName, data) => {
@@ -42,7 +54,8 @@ function setupIO(io) {
             console.log("message received: " , data);
             console.log("sender: ", sender);
             console.log("room: ", roomName);
-            socket.to(roomName).emit("receive_messages",type, roomName, sender, data);
+            const senderName = userSocketMap.get(sender).name;
+            socket.to(roomName).emit("receive_messages",type, roomName, sender, senderName, data);
         })
     
         socket.on("create_room", (selectedMembers, roomName) => {
@@ -62,6 +75,14 @@ function setupIO(io) {
         
         socket.on("disconnect", () => {
             console.log("User Disconnected", socket.id);
+            const email = userSocketMap.get(socket.id) && userSocketMap.get(socket.id).email;
+            if(email){
+                const user = getUser(email);
+                user.socketID = null;
+                updateUser(user.id, user);
+                delete userSocketMap[socket.id];
+                console.log("User deleted from map");   
+            }
             emitOnlineMembers(socket);
         });
     })

@@ -43,7 +43,7 @@ export default function ChatRoom() {
   },[]);
   const Commerce = 10;
   React.useEffect(()=>{
-      socket.on("receive_messages", (type, roomName, sender, data)=>{
+      socket.on("receive_messages", (type, roomName, sender, senderName, data)=>{
           const newMessage = createMessage(data, "received", sender);
           if(type == 'broadcast'){
               const broadCastRoom = rooms.find(r => r.type == "broadcast")

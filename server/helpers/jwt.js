@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const { getUser } = require("../database.js");
 const dotenv = require("dotenv");
 dotenv.config();
 
@@ -8,8 +9,11 @@ function authenticate(req, res, next) {
     console.log(req.cookies);
     if (!token) return res.status(403).json({ status: 403, message: "Unauthorized" });
 
-    jwt.verify(token, JWT_SECRET, (err, user) => {
+    jwt.verify(token, JWT_SECRET, (err, u) => {
         if (err) return res.status(403).json({ status: 403, message: "Invalid token" });
+        const user = getUser(u.email);
+        if(!user) return res.status(403).json({ status: 403, message: "User Deleted" });
+        
         req.user = user;
         next();
     });

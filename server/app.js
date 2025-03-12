@@ -47,8 +47,8 @@ app.post("/signup",async (req,res) => {
     }
     
     if(getUser(email)){
+        console.log(getUser(email));
         return res.json({status: 400, message: "User Already exist"});
-
     }
 
     const hashedPassword = await hashPassword(password);
@@ -90,7 +90,14 @@ app.post("/login", async (req, res) => {
 
 app.get("/isLoggedIn", authenticate, async (req, res) => {
     console.log("authorized");
-    res.json({status: 200, message: "Authorized"})
+    const email = req.user.email;
+    const user = getUser(email);
+    res.json({status: 200, 
+        message: "Authorized", 
+        user: {
+            name: user.name,
+            email: user.email
+        }});
 })
 
 

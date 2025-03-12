@@ -1,6 +1,4 @@
 const { v4: uuidv4 } = require('uuid');
-
-const users = [];
 /*
 user = {
     id: string,
@@ -44,5 +42,4 @@ function setSocketID(id, socketID){
     user.socketID = socketID;
     updateUser(id, socketID);
 }
-
 module.exports = { createUser, saveUser, getUser, updateUser, setSocketID };
